@@ -1,0 +1,17 @@
+---
+title: "Modelling teacher burnout - non-linear extensions of SEM"
+format: html
+bibliography: bib.bib
+---
+
+# The Dataset
+
+Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asian context](https://www.sciencedirect.com/science/article/pii/S2405844019368033)" [@prasojoTeachersBurnoutSEM2020], and used as an example data set in @jongerlingStructuralEquationModeling2024.
+
+## Importing data
+
+``` {r}
+
+```
+
+# References
