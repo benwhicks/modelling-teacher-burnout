@@ -134,8 +134,7 @@ This does not replicate the plot
 
 # Extending
 
-The SEM model is instantaneous - this is just a representation at a particular point in time, for a particular population. This might be seen as a boundary condition for a or initial state for a broader system, possibly modelled through Differential Equations (DEs).
-
+The SEM model is instantaneous - this is just a representation at a particular point in time, for a particular population. This might be seen as a boundary condition for a or initial state for a broader system, possibly modelled through Differential Equations (DEs). Part of the attraction of this kind of modelling is the idea of an Initial Value Problem (IVP) and Boundary Value Problem (BVP). The IVP describes an Ordinary DE (ODE) where we know some initial starting point. The BVP describes a Partial DE (PDE) where we know the behaviour along some boundary, and try and solve for the system within this boundary. The attraction of the BVP for modelling learning is that it highlights the boundaries of the system - a part that we frequently ignore in trying to describe the linear causation in the middle. 
 
 
 # References
