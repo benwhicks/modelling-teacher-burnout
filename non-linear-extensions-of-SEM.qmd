@@ -4,14 +4,34 @@ format: html
 bibliography: bib.bib
 ---
 
-# The Dataset
+``` {r Loading-packages}
+#| code-fold: true
+#| code-summary: "Loading R packages"
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rio)
+```
 
-Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asian context](https://www.sciencedirect.com/science/article/pii/S2405844019368033)" [@prasojoTeachersBurnoutSEM2020], and used as an example data set in @jongerlingStructuralEquationModeling2024.
+### The Dataset
 
-## Importing data
+Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asian context](https://www.sciencedirect.com/science/article/pii/S2405844019368033)" [@prasojoTeachersBurnoutSEM2020], and used as an example data set in @jongerlingStructuralEquationModeling2024, which is where the data is imported from:
 
 ``` {r}
-
+#| code-summary: "Importing data"
+dataset <- import("https://github.com/lamethods/data/raw/main/4_teachersBurnout/2.%20Response.xlsx") |> 
+    as_tibble()
+var_names <- colnames(dataset)
 ```
+
+``` {r}
+#| include: false
+# Saving data - just in case
+saveRDS(dataset, "data/dataset.RDS")
+```
+
+# Initial SEM
+
+# Extending
 
 # References
