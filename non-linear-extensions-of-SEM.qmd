@@ -12,8 +12,7 @@ bibliography: bib.bib
 library(tidyverse)
 library(rio)
 library(lavaan)
-library(lavaanPlot)
-library(blavaan)
+library(semPlot)
 
 # couldn't install "sleasy" package so copied code:
 sem_structural_results <- function(model, nd = 3) {
@@ -59,9 +58,17 @@ Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asia
 
 ``` {r}
 #| code-summary: "Importing data"
+#| eval: false
 dataset <- import("https://github.com/lamethods/data/raw/main/4_teachersBurnout/2.%20Response.xlsx") |> 
     as_tibble()
-var_names <- colnames(dataset)
+```
+
+``` {r}
+#| echo: false
+dataset <- readRDS("data/dataset.RDS")
+```
+
+``` {r}
 head(dataset |> select(TSC1, TSC1, TE1, DE1, EE1, RPA1))
 ```
 
@@ -107,7 +114,6 @@ holdout <- tmp$holdout
 fit.mlr <- sem(model = SEM_model, data = dataset, std.lv = TRUE,
               estimator = "MLR", meanstructure = TRUE)
 # summary(fit.mlr, standardized = TRUE)
-fit.blv <- bsem(SEM_model, data = dataset)
 ```
 
 ``` {r}
@@ -118,7 +124,13 @@ semPaths(fit.mlr, layout = "tree", what = "std",
          curvature = 4,
          groups = list(c("TSC", "TE"), c("EE", "DE", "RPA"))
          )
+```
 
+``` {r using-blavaan}
+#| include: false
+
+library(blavaan)
+fit.blv <- bsem(SEM_model, data = dataset)
 semPaths(fit.blv, layout = "tree2", what = "est", 
          structural = TRUE, 
          residuals = FALSE, # no self-loops
@@ -126,11 +138,9 @@ semPaths(fit.blv, layout = "tree2", what = "est",
          curvature = 4,
          groups = list(c("TSC", "TE"), c("EE", "DE", "RPA"))
          )
-
-
 ```
 
-This does not replicate the plot
+This does not replicate the plot from the paper, but this could be due to omission of controls not in the open data (gender and experience).
 
 # Extending
 
