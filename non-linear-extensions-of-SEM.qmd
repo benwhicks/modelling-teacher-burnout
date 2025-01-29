@@ -36,6 +36,24 @@ sem_structural_results <- function(model, nd = 3) {
 
 ### The Dataset
 
+The data examines the relationship between two aspects of teacher capacity with three aspects of teacher burnout. 
+
+Teacher capacity: 
+
+- Teacher Self Concept (TSC)
+- Teacher Efficacy (TE)
+
+Teacher burnout:
+
+- Emotional Exhaustion (EE)
+- Depersonalisation (DP)
+- Reduced Personal Accomplishment (RPA)
+
+Not included in the open dataset:
+
+- Gender (619 male, 258 female)
+- Experience (291 less than five years, 585 more than five years)
+
 Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asian context](https://www.sciencedirect.com/science/article/pii/S2405844019368033)" [@prasojoTeachersBurnoutSEM2020], and used as an example data set in @jongerlingStructuralEquationModeling2024, which is where the data is imported from:
 
 ``` {r}
@@ -43,6 +61,7 @@ Originally published in the paper "[Teachers' burnout: A SEM analysis in an Asia
 dataset <- import("https://github.com/lamethods/data/raw/main/4_teachersBurnout/2.%20Response.xlsx") |> 
     as_tibble()
 var_names <- colnames(dataset)
+head(dataset |> select(TSC1, TSC1, TE1, DE1, EE1, RPA1))
 ```
 
 Note that the data is not complete, @jongerlingStructuralEquationModeling2024 mention that gender was in the original dataset for the paper but not included (understandably) in the open dataset. 
@@ -75,21 +94,27 @@ RPA ~ TE + TSC
 ```
 
 ``` {r}
+#| include: false
 set.seed(19)
 ind <- sample(c(rep("model.building", 438), rep("holdout", 438)))
 tmp <- split(dataset, ind)
 model.building <- tmp$model.building
 holdout <- tmp$holdout
-
-sem_robust <- sem(model = SEM_model, data = model.building, std.lv = TRUE,
-              estimator = "MLR", meanstructure = TRUE)
-sem_structural_results(sem_robust, nd = 3)
-
 ```
 
 ``` {r}
-lavaanPlot(sem_robust, coefs = TRUE, stand = TRUE)
+fit.mlr <- sem(model = SEM_model, data = dataset, std.lv = TRUE,
+              estimator = "MLR", meanstructure = TRUE)
+# summary(fit.mlr, standardized = TRUE)
 ```
+
+``` {r}
+lavaanPlot(fit.mlr, coefs = TRUE)
+
+
+```
+
+This does not replicate the plot
 
 # Extending
 

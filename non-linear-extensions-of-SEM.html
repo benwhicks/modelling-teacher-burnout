@@ -87,6 +87,11 @@ div.csl-indent {
 <script src="non-linear-extensions-of-SEM_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="non-linear-extensions-of-SEM_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="non-linear-extensions-of-SEM_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="non-linear-extensions-of-SEM_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="non-linear-extensions-of-SEM_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="non-linear-extensions-of-SEM_files/libs/viz-1.8.2/viz.js"></script>
+<link href="non-linear-extensions-of-SEM_files/libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="non-linear-extensions-of-SEM_files/libs/grViz-binding-1.0.11/grViz.js"></script>
 
 
 </head>
@@ -120,20 +125,101 @@ div.csl-indent {
 <details class="code-fold">
 <summary>Loading R packages</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rio)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaanPlot)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># couldn't install "sleasy" package so copied code:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sem_structural_results <span class="ot">&lt;-</span> <span class="cf">function</span>(model, <span class="at">nd =</span> <span class="dv">3</span>) {</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  indic <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"std"</span>)<span class="sc">$</span>beta <span class="sc">!=</span> <span class="dv">0</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">arr.ind =</span> <span class="cn">TRUE</span>, <span class="at">useNames =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">cbind</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"std"</span>)<span class="sc">$</span>beta)[indic[, <span class="dv">2</span>]],</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"std"</span>)<span class="sc">$</span>beta)[indic[, <span class="dv">1</span>]],</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"std"</span>)<span class="sc">$</span>beta[indic], <span class="at">digits =</span> <span class="dv">3</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"se"</span>)<span class="sc">$</span>beta[indic], <span class="at">digits =</span> <span class="dv">3</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">pnorm</span>(<span class="fu">abs</span>(<span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"coef"</span>)<span class="sc">$</span>beta <span class="sc">/</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">inspect</span>(model, <span class="at">what =</span> <span class="st">"se"</span>)<span class="sc">$</span>beta), <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)[indic], <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(result) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"outcome"</span>, <span class="st">"predictor"</span>, <span class="st">"std estimate"</span>, <span class="st">"se"</span>, <span class="st">"p-value"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="the-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="the-dataset">The Dataset</h3>
+<p>The data examines the relationship between two aspects of teacher capacity with three aspects of teacher burnout.</p>
+<p>Teacher capacity:</p>
+<ul>
+<li>Teacher Self Concept (TSC)</li>
+<li>Teacher Efficacy (TE)</li>
+</ul>
+<p>Teacher burnout:</p>
+<ul>
+<li>Emotional Exhaustion (EE)</li>
+<li>Depersonalisation (DP)</li>
+<li>Reduced Personal Accomplishment (RPA)</li>
+</ul>
+<p>Not included in the open dataset:</p>
+<ul>
+<li>Gender (619 male, 258 female)</li>
+<li>Experience (291 less than five years, 585 more than five years)</li>
+</ul>
 <p>Originally published in the paper “<a href="https://www.sciencedirect.com/science/article/pii/S2405844019368033">Teachers’ burnout: A SEM analysis in an Asian context</a>” <span class="citation" data-cites="prasojoTeachersBurnoutSEM2020">(<a href="#ref-prasojoTeachersBurnoutSEM2020" role="doc-biblioref">Prasojo et al. 2020</a>)</span>, and used as an example data set in <span class="citation" data-cites="jongerlingStructuralEquationModeling2024">Jongerling et al. (<a href="#ref-jongerlingStructuralEquationModeling2024" role="doc-biblioref">2024</a>)</span>, which is where the data is imported from:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"https://github.com/lamethods/data/raw/main/4_teachersBurnout/2.%20Response.xlsx"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>var_names <span class="ot">&lt;-</span> <span class="fu">colnames</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>var_names <span class="ot">&lt;-</span> <span class="fu">colnames</span>(dataset)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dataset <span class="sc">|&gt;</span> <span class="fu">select</span>(TSC1, TSC1, TE1, DE1, EE1, RPA1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+   TSC1   TE1   DE1   EE1  RPA1
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     4     4     4     4     4
+2     4     4     4     4     4
+3     4     5     5     4     5
+4     4     5     5     4     5
+5     4     4     4     4     4
+6     4     4     4     4     4</code></pre>
 </div>
+</div>
+<p>Note that the data is not complete, <span class="citation" data-cites="jongerlingStructuralEquationModeling2024">Jongerling et al. (<a href="#ref-jongerlingStructuralEquationModeling2024" role="doc-biblioref">2024</a>)</span> mention that gender was in the original dataset for the paper but not included (understandably) in the open dataset.</p>
 </section>
 <section id="initial-sem" class="level1">
 <h1>Initial SEM</h1>
+<p>Taken from <span class="citation" data-cites="jongerlingStructuralEquationModeling2024">Jongerling et al. (<a href="#ref-jongerlingStructuralEquationModeling2024" role="doc-biblioref">2024</a>)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>SEM_model <span class="ot">&lt;-</span> <span class="st">'</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Regressing items on factors </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">TSC =~ TSC1 + TSC2 + TSC3 + TSC4 + TSC5</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">TE =~ TE1 + TE2 + TE3 + TE5</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">EE =~ EE1 + EE2 + EE3 + EE4</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">DE =~ DE1 + DE2 + DE3</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">RPA =~ RPA1 + RPA2 + RPA3 + RPA4</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st"># Relations between factors</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">TE ~ TSC</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">EE ~ TE + TSC</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st">DE ~ TE + TSC</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="st">RPA ~ TE + TSC</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="st">'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit.mlr <span class="ot">&lt;-</span> <span class="fu">sem</span>(<span class="at">model =</span> SEM_model, <span class="at">data =</span> dataset, <span class="at">std.lv =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">estimator =</span> <span class="st">"MLR"</span>, <span class="at">meanstructure =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(fit.mlr, standardized = TRUE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lavaanPlot</span>(fit.mlr, <span class="at">coefs =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="grViz html-widget html-fill-item" id="htmlwidget-1b71693dfc6c33424916" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-1b71693dfc6c33424916">{"x":{"diagram":" digraph plot { \n graph [ overlap = true, fontsize = 10 ] \n node [ shape = box ] \n node [shape = box] \n TSC1; TSC2; TSC3; TSC4; TSC5; TE1; TE2; TE3; TE5; EE1; EE2; EE3; EE4; DE1; DE2; DE3; RPA1; RPA2; RPA3; RPA4 \n node [shape = oval] \n TSC; TE; EE; DE; RPA \n \n edge [ color = black ] \n TSC->TE [label = \"0.89\"] TE->EE [label = \"0.42\"] TSC->EE [label = \"0.91\"] TE->DE [label = \"0.24\"] TSC->DE [label = \"0.54\"] TE->RPA [label = \"0.38\"] TSC->RPA [label = \"0.58\"] TSC->TSC1 [label = \"0.45\"] TSC->TSC2 [label = \"0.45\"] TSC->TSC3 [label = \"0.42\"] TSC->TSC4 [label = \"0.42\"] TSC->TSC5 [label = \"0.46\"] TE->TE1 [label = \"0.39\"] TE->TE2 [label = \"0.4\"] TE->TE3 [label = \"0.42\"] TE->TE5 [label = \"0.37\"] EE->EE1 [label = \"0.33\"] EE->EE2 [label = \"0.4\"] EE->EE3 [label = \"0.38\"] EE->EE4 [label = \"0.37\"] DE->DE1 [label = \"0.36\"] DE->DE2 [label = \"0.35\"] DE->DE3 [label = \"0.41\"] RPA->RPA1 [label = \"0.5\"] RPA->RPA2 [label = \"0.49\"] RPA->RPA3 [label = \"0.42\"] RPA->RPA4 [label = \"0.33\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>This does not replicate the plot</p>
 </section>
 <section id="extending" class="level1">
 <h1>Extending</h1>
