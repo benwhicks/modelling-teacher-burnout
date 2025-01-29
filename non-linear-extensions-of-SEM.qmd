@@ -11,6 +11,27 @@ bibliography: bib.bib
 #| warning: false
 library(tidyverse)
 library(rio)
+library(lavaan)
+library(lavaanPlot)
+
+# couldn't install "sleasy" package so copied code:
+sem_structural_results <- function(model, nd = 3) {
+  indic <- which(inspect(model, what = "std")$beta != 0,
+                 arr.ind = TRUE, useNames = TRUE)
+
+  result <- as.data.frame(cbind(
+    colnames(inspect(model, what = "std")$beta)[indic[, 2]],
+    colnames(inspect(model, what = "std")$beta)[indic[, 1]],
+    round(inspect(model, what = "std")$beta[indic], digits = 3),
+    round(inspect(model, what = "se")$beta[indic], digits = 3),
+    round(pnorm(abs(inspect(model, what = "coef")$beta /
+                      inspect(model, what = "se")$beta), lower.tail = FALSE)[indic], digits = 3)
+  )
+  )
+  colnames(result) <- c("outcome", "predictor", "std estimate", "se", "p-value")
+
+  return(result)
+}
 ```
 
 ### The Dataset
@@ -24,6 +45,8 @@ dataset <- import("https://github.com/lamethods/data/raw/main/4_teachersBurnout/
 var_names <- colnames(dataset)
 ```
 
+Note that the data is not complete, @jongerlingStructuralEquationModeling2024 mention that gender was in the original dataset for the paper but not included (understandably) in the open dataset. 
+
 ``` {r}
 #| include: false
 # Saving data - just in case
@@ -31,6 +54,42 @@ saveRDS(dataset, "data/dataset.RDS")
 ```
 
 # Initial SEM
+
+Taken from @jongerlingStructuralEquationModeling2024. 
+
+``` {r}
+SEM_model <- '
+# Regressing items on factors 
+TSC =~ TSC1 + TSC2 + TSC3 + TSC4 + TSC5
+TE =~ TE1 + TE2 + TE3 + TE5
+EE =~ EE1 + EE2 + EE3 + EE4
+DE =~ DE1 + DE2 + DE3
+RPA =~ RPA1 + RPA2 + RPA3 + RPA4
+
+# Relations between factors
+TE ~ TSC
+EE ~ TE + TSC
+DE ~ TE + TSC
+RPA ~ TE + TSC
+'
+```
+
+``` {r}
+set.seed(19)
+ind <- sample(c(rep("model.building", 438), rep("holdout", 438)))
+tmp <- split(dataset, ind)
+model.building <- tmp$model.building
+holdout <- tmp$holdout
+
+sem_robust <- sem(model = SEM_model, data = model.building, std.lv = TRUE,
+              estimator = "MLR", meanstructure = TRUE)
+sem_structural_results(sem_robust, nd = 3)
+
+```
+
+``` {r}
+lavaanPlot(sem_robust, coefs = TRUE, stand = TRUE)
+```
 
 # Extending
 
