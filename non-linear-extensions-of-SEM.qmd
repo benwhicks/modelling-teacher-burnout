@@ -13,6 +13,7 @@ library(tidyverse)
 library(rio)
 library(lavaan)
 library(lavaanPlot)
+library(blavaan)
 
 # couldn't install "sleasy" package so copied code:
 sem_structural_results <- function(model, nd = 3) {
@@ -106,10 +107,25 @@ holdout <- tmp$holdout
 fit.mlr <- sem(model = SEM_model, data = dataset, std.lv = TRUE,
               estimator = "MLR", meanstructure = TRUE)
 # summary(fit.mlr, standardized = TRUE)
+fit.blv <- bsem(SEM_model, data = dataset)
 ```
 
 ``` {r}
-lavaanPlot(fit.mlr, coefs = TRUE)
+semPaths(fit.mlr, layout = "tree", what = "std", 
+         structural = TRUE, 
+         residuals = FALSE, # no self-loops
+         intercepts = FALSE, # no triangles
+         curvature = 4,
+         groups = list(c("TSC", "TE"), c("EE", "DE", "RPA"))
+         )
+
+semPaths(fit.blv, layout = "tree2", what = "est", 
+         structural = TRUE, 
+         residuals = FALSE, # no self-loops
+         intercepts = FALSE, # no triangles
+         curvature = 4,
+         groups = list(c("TSC", "TE"), c("EE", "DE", "RPA"))
+         )
 
 
 ```
@@ -117,5 +133,9 @@ lavaanPlot(fit.mlr, coefs = TRUE)
 This does not replicate the plot
 
 # Extending
+
+The SEM model is instantaneous - this is just a representation at a particular point in time, for a particular population. This might be seen as a boundary condition for a or initial state for a broader system, possibly modelled through Differential Equations (DEs).
+
+
 
 # References
